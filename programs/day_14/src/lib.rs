@@ -2,6 +2,8 @@ use anchor_lang::prelude::*;
 
 declare_id!("3WhAhhRKRxMsjYH5tdTcUeTiFDpKYxf54KerPbUNxgwp");
 
+const OWNER: &str = "ESyHSWtc6YwaFHW3kGrL9bA1A8qzKB8eyAYgz9y4G3KX";
+
 #[program]
 pub mod day_14 {
     use super::*;
@@ -37,6 +39,22 @@ pub mod day_14 {
 
         Ok(())
     }
+    #[access_control(check(&ctx))]
+    pub fn hello_owner(ctx: Context<Initialize>) -> Result<()> {
+        msg!("Holla, I'm the owner.");
+        Ok(())
+    }
+
+  
+}
+
+fn check(ctx: &Context<Initialize>) -> Result<()>{
+    require_keys_eq!(
+        ctx.accounts.signer1.key(),
+        OWNER.parse::<Pubkey>().unwrap(),
+        OnlyOwnerError::NotOwner
+    );
+    Ok(())
 }
 
 #[derive(Accounts)]
@@ -45,4 +63,11 @@ pub struct Initialize<'info> {
     pub signer1: Signer<'info>,
     pub signer2: Signer<'info>,
     pub signer3: Signer<'info>
+}
+
+
+#[error_code]
+pub enum OnlyOwnerError {
+    #[msg("Only owner can call this function!")]
+    NotOwner,
 }

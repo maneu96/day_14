@@ -40,4 +40,28 @@ describe("day_14", () => {
     console.log("The signer2: ", myKeypair.publicKey.toBase58());
     console.log("The signer3: ", myKeypair2.publicKey.toBase58());
   });
+
+
+  it('Owner calls ownerOnly function', async() => {
+    const tx  = await program.methods.helloOwner().accounts({
+      signer1: program.provider.publicKey,
+    }).rpc();
+  });
+
+  it('Someone else trys to run Owner fucntion', async() => {
+    
+    await program.methods.initialize()
+    try{
+      const tx = await program.methods
+      .helloOwner()
+      .accounts({
+        signer1: myKeypair.publicKey
+      })
+      .signers([myKeypair])
+      .rpc();
+    }
+    catch(error){
+      console.log(error.error);
+    }
+  });
 });
